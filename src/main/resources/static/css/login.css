@@ -1,0 +1,40 @@
+.form-field {
+    position: relative;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #00BCD4FF;
+}
+
+.form-lb {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 21px;
+    user-select: none;
+    color: var(--black2);
+    pointer-events: none;
+    transition: 0.25s ease;
+    min-width: 90px;
+}
+
+.form-input {
+    border: none;
+    width: calc(100% - 100px);
+    height: 50px;
+    margin-left: 100px;
+    outline-color: green;
+}
+
+.form-input:focus {
+    outline: none;
+}
+
+.form-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 30px;
+    user-select: none;
+    color: var(--black2);
+    pointer-events: none;
+    transition: 0.25s ease;
+}

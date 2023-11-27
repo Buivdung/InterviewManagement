@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/navigation}"
+>
+<head>
+    <th:block th:replace="~{layout/fragment::head}">
+    </th:block>
+    <link th:href="@{/css/common-add.css}" rel="stylesheet">
+    <link th:href="@{/css/choices.css}" rel="stylesheet">
+    <script th:src="@{/js/choices.js}"></script>
+    <script th:src="@{/js/candidate.js}"></script>
+
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div>
+        <nav aria-label="breadcrumb" class="my-4 ms-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item" aria-current="page">Edit candidate</li>
+            </ol>
+        </nav>
+        <section class="p-5 user-container">
+            <div th:if="${message}" class="text-center">
+                <span th:utext="${message}" class="text-danger"></span>
+            </div>
+            <form th:action="@{/candidate/edit/{id}(id=${candidate.id})}" method="post" enctype="multipart/form-data">
+                <h5 class="mb-3">I. Personal information</h5>
+                <div class="user-form">
+                    <div class="user-form-left">
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="fullName"
+                                   name="fullName"
+                                   th:value="${candidate.fullName}"
+                                   required/>
+                            <label class="form-lb" for="fullName">Full name</label>
+                            <ion-icon class="form-icon" name="newspaper-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input date"
+                                   id="dob"
+                                   th:value="${candidate.dob}"
+                                   name="dob" required/>
+                            <label class="form-lb" for="dob"> D.O.B</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="text"
+                                   id="phoneNumber"
+                                   th:value="${candidate.phoneNumber}"
+                                   name="phoneNumber" required/>
+                            <label class="form-lb" for="phoneNumber"> Phone no.</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="user-form-right">
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="email"
+                                   id="email"
+                                   th:value="${candidate.email}"
+                                   name="email" required/>
+                            <label class="form-lb" for="email"> Email</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="text"
+                                   id="address"
+                                   th:value="${candidate.address}"
+                                   name="address" required/>
+                            <label class="form-lb" for="address"> Address</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="gender" name="gender" required>
+                                <option disabled selected> Select gender</option>
+                                <option th:selected="${candidate.gender != null && candidate.gender.name() == 'MALE'}"
+                                        value="MALE"> Male
+                                </option>
+                                <option th:selected="${candidate.gender != null && candidate.gender.name() == 'FEMALE'}"
+                                        value="FEMALE"> Female
+                                </option>
+                                <option th:selected="${candidate.gender != null && candidate.gender.name() == 'OTHER'}"
+                                        value="OTHER"> Other
+                                </option>
+                            </select>
+                            <label class="form-lb" for="gender">Gender</label>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mb-3">II. Professional information</h5>
+                <div class="user-form">
+                    <div class="user-form-left">
+                        <div class="form-field">
+                            <label class="form-input d-flex align-items-center"
+                                   th:utext="${candidate.cv}"
+                                   for="cv" id="fileName"></label>
+                            <input type="file" name="cv" id="cv" class="d-none">
+                            <label class="form-lb" for="cv">Cv</label>
+                            <ion-icon class="form-icon" name="newspaper-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="position" name="position" required>
+                                <option disabled selected> Select position</option>
+                                <option th:selected="${candidate.position != null && candidate.position.name() == 'BACKEND_DEVELOPER'}"
+                                        value="BACKEND_DEVELOPER"> Backend Developer
+                                </option>
+                                <option th:selected="${candidate.position != null && candidate.position.name() == 'BUSINESS_ANALYST'}"
+                                        value="BUSINESS_ANALYST"> Business Analyst
+                                </option>
+                                <option th:selected="${candidate.position != null && candidate.position.name() == 'TESTER'}"
+                                        value="TESTER"> Tester
+                                </option>
+                                <option th:selected="${candidate.position != null && candidate.position.name() == 'HR'}"
+                                        value="HR"> HR
+                                </option>
+                                <option th:selected="${candidate.position != null && candidate.position.name() == 'PROJECT_MANAGER'}"
+                                        value="PROJECT_MANAGER"> Project manager
+                                </option>
+                            </select>
+                            <label class="form-lb" for="position"> Position</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input" id="skills" name="skills" multiple>
+                                <option th:each="s : ${skills}"
+                                        th:utext="${s.name}"
+                                        th:selected="${skillIds.containsAll(s.id)}"
+                                        th:value="${s.id}"></option>
+                            </select>
+                            <label class="form-lb form-lb-gender" for="skills"> Skill</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="recruiterId" name="recruiterId" required>
+                                <option disabled selected> Select Recruiter</option>
+                                <option th:each="r :${recruiters}"
+                                        th:utext="${r.fullName}"
+                                        th:selected="${candidate.recruiter.id == r.id}"
+                                        th:value="${r.id}"></option>
+                            </select>
+                            <label class="form-lb" for="recruiterId">Recruiter</label>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="user-form-right">
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="status" name="status" required>
+                                <option th:selected="${candidate.status != null && candidate.status.name() == 'OPEN'}"
+                                        value="OPEN"
+                                > Open
+                                </option>
+                                <option th:selected="${candidate.status != null && candidate.status.name() == 'OPEN'}"
+                                        value="BANNED"
+                                > Banned
+                                </option>
+                            </select>
+                            <label class="form-lb" for="status"> Status</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="number"
+                                   id="yearOfExperience"
+                                   th:value="${candidate.yearOfExperience}"
+                                   name="yearOfExperience" required/>
+                            <label class="form-lb" for="yearOfExperience"> Year Of Experience</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="highestLevel" name="highestLevel" required>
+                                <option disabled selected> Select Highest Level</option>
+                                <option th:selected="${candidate.highestLevel != null && candidate.highestLevel.name() == 'HIGH_SCHOOL'}"
+                                        value="HIGH_SCHOOL"> High School
+                                </option>
+                                <option th:selected="${candidate.highestLevel != null && candidate.highestLevel.name() == 'BACHELOR_S_DEGREE'}"
+                                        value="BACHELOR_S_DEGREE"> Bachelor's Degree
+                                </option>
+                                <option th:selected="${candidate.highestLevel != null && candidate.highestLevel.name() == 'MASTER_DEGREE_PhD'}"
+                                        value="MASTER_DEGREE_PhD"> Master Degree, PhD
+                                </option>
+                            </select>
+                            <label class="form-lb" for="highestLevel">Highest Level</label>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="text"
+                                   id="note"
+                                   name="note"
+                                   th:value="${candidate.note }"
+                                   required/>
+                            <label class="form-lb" for="note"> Notes</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="submit" value="Save" class="btn btn-custom btn-outline-primary me-5">
+                    <a th:href="@{/candidate}" role="button"
+                       class="btn btn-custom btn-outline-secondary">
+                        Back
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
+    <script th:src="@{/js/common-add.js}"></script>
+</div>
+</body>
+</html>

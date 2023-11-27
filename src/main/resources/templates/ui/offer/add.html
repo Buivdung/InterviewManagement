@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/navigation}"
+>
+<head>
+    <th:block th:replace="~{layout/fragment::head}">
+    </th:block>
+    <link th:href="@{/css/common-add.css}" rel="stylesheet">
+    <link th:href="@{/css/choices.css}" rel="stylesheet">
+    <script th:src="@{/js/choices.js}"></script>
+    <script th:src="@{/js/job.js}"></script>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div>
+        <nav aria-label="breadcrumb" class="my-4 ms-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item" aria-current="page">Create offer</li>
+            </ol>
+        </nav>
+        <section class="p-5 user-container">
+            <div th:if="${message}" class="text-center">
+                <span th:utext="${message}" class="text-danger"></span>
+            </div>
+            <form th:action="@{/offer/create}" method="post" th:object="${offerRequest}">
+                <div class="user-form">
+                    <div class="user-form-left">
+                        <div class="form-field">
+                            <select class="form-input" id="candidateId" name="candidateId">
+                                <option selected disabled>Select candidate</option>
+                                <option th:each=" c : ${candidates}"
+                                        th:utext="${c.fullName}"
+                                        th:value="${c.id}"
+                                        th:selected="${c.id == offer.candidateId}"></option>
+                            </select>
+                            <label class="form-lb form-lb-gender" for="candidateId"> Candidate</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="position" name="position" required>
+                                <option disabled selected> Select position</option>
+                                <option th:selected="${offer.position != null && offer.position.name() == 'BACKEND_DEVELOPER'}"
+                                        value="BACKEND_DEVELOPER"> Backend Developer
+                                </option>
+                                <option th:selected="${offer.position != null && offer.position.name() == 'BUSINESS_ANALYST'}"
+                                        value="BUSINESS_ANALYST"> Business Analyst
+                                </option>
+                                <option th:selected="${offer.position != null && offer.position.name() == 'TESTER'}"
+                                        value="TESTER"> Tester
+                                </option>
+                                <option th:selected="${offer.position != null && offer.position.name() == 'HR'}"
+                                        value="HR"> HR
+                                </option>
+                                <option th:selected="${offer.position != null && offer.position.name() == 'PROJECT_MANAGER'}"
+                                        value="PROJECT_MANAGER"> Project manager
+                                </option>
+                            </select>
+                            <label class="form-lb" for="position"> Position</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input" id="approvedBy" name="approvedBy">
+                                <option selected disabled>Select approved</option>
+                                <option th:each=" u : ${users}"
+                                        th:utext="${u.fullName}"
+                                        th:value="${u.id}"
+                                        th:if="${u.account.role.name() == 'ROLE_MANAGER'}"
+                                        th:selected="${u.id == offer.approvedBy}"></option>
+                            </select>
+                            <label class="form-lb form-lb-gender" for="approvedBy"> Approved By</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select name="contractType" id="contractType" class="form-input">
+                                <option value=""> Select contract type </option>
+                                <option th:selected="${offer.contractType != null && offer.contractType.name() == 'TRAIL' }"
+                                        value="TRAIL">Trail</option>
+                                <option th:selected="${offer.contractType != null && offer.contractType.name() == 'TRAINING' }"
+                                        value="TRAINING">Training</option>
+                                <option th:selected="${offer.contractType != null && offer.contractType.name() == 'ONE_YEAR' }"
+                                        value="ONE_YEAR">One year</option>
+                                <option th:selected="${offer.contractType != null && offer.contractType.name() == 'THREE_YEAR' }"
+                                        value="THREE_YEAR">Three year</option>
+                                <option th:selected="${offer.contractType != null && offer.contractType.name() == 'UNLIMITED' }"
+                                        value="UNLIMITED">Unlimited</option>
+                            </select>
+                            <label class="form-lb" for="contractType"> Contract type</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-input d-flex align-items-center">
+                                <span id="status">Waiting for offer approve</span>
+                            </div>
+                            <label class="form-lb"> Status</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-input d-flex align-items-center">
+                                <span id="interviewers">Interviewer</span>
+                            </div>
+                            <label class="form-lb"> Interviewers</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-input d-flex align-items-center">
+                                <span id="interviewer-notes">N/A</span>
+                            </div>
+                            <label class="form-lb"> Interviewer notes</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="user-form-right">
+                        <div class="form-field">
+                            <input class="form-input date"
+                                   id="contractFrom"
+                                   th:value="${offer.contractFrom}"
+                                   name="contractFrom" required/>
+                            <label class="form-lb" for="contractFrom"> Contract from</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select name="level" id="level" class="form-input">
+                                <option value=""> Select level</option>
+                                <option th:each="l:${levels}"
+                                        th:utext="${l.name}"
+                                        th:selected="${offer.level == l.id}"
+                                        th:value="${l.id}"
+                                ></option>
+                            </select>
+                            <label class="form-lb" for="level">  Level</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select name="department" id="department" class="form-input">
+
+                                <option value=""> Select department</option>
+                                <option th:each="d:${departments}"
+                                        th:selected="${offer.department == d.id}"
+                                        th:utext="${d.name}"
+                                        th:value="${d.id}"
+                                ></option>
+                            </select>
+                            <label class="form-lb" for="department">  Department</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select name="recruiterId" id="recruiterId" class="form-input">
+                                <option value="">Select recruiter</option>
+                                <option th:each="u : ${users}"
+                                        th:utext="${u.fullName}"
+                                        th:value="${u.id}"
+                                        th:selected="${offer.recruiterId == u.id}"
+                                        th:if="${u.account.role.name() == 'ROLE_RECRUITER'}"
+                                ></option>
+                            </select>
+                            <label class="form-lb" for="recruiterId">  Recruiter</label>
+                            <ion-icon class="form-icon" name="barbell-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input date"
+                                   id="dueDate"
+                                   th:value="${offer.dueDate}"
+                                   name="dueDate" required/>
+                            <label class="form-lb" for="dueDate"> Due date</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="number"
+                                   id="basicSalary"
+                                   th:value="${offer.basicSalary}"
+                                   name="basicSalary" required/>
+                            <label class="form-lb" for="basicSalary"> Basic salary</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   id="notes"
+                                   th:value="${offer.notes}"
+                                   name="notes" required/>
+                            <label class="form-lb" for="notes"> Notes</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="submit" value="Add" class="btn btn-custom btn-outline-primary me-5">
+                    <a th:href="@{/user}" role="button"
+                       class="btn btn-custom btn-outline-secondary">
+                        Back
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
+    <script th:src="@{/js/common-add.js}"></script>
+    <script th:src="@{/js/offer.js}"></script>
+</div>
+</body>
+</html>

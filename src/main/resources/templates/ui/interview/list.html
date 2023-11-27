@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/navigation}"
+>
+<head>
+    <th:block th:replace="~{layout/fragment::head}">
+    </th:block>
+    <link th:href="@{/css/common-list.css}" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="user-container">
+        <div class="">
+            <nav aria-label="breadcrumb" class="my-3 ms-5">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item" aria-current="page">List interview schedule</li>
+                </ol>
+            </nav>
+            <section class="mb-2">
+                <div class="user-search px-5">
+                    <form th:action="@{/interview}" class="form-search">
+                        <div class="mx-lg-4">
+                            <input class="input-search w-100"
+                                   type="text"
+                                   id="param"
+                                   name="param"
+                                   th:value="${searchResponse.param}"
+                                   placeholder="Search"/>
+                            <button class="submit-search">
+                                <ion-icon name="search-outline"
+                                          class="h5 m-0 ps-2 pe-3 pt-1 text-white">
+                                </ion-icon>
+                            </button>
+                        </div>
+                        <select name="status" class="input-search  my-3 my-lg-0 me-lg-3">
+                            <option selected disabled value="">-- status --</option>
+                            <option th:selected="${searchResponse.status != null && searchResponse.status.name() == 'OPEN'}"
+                                    value="OPEN">Open
+                            </option>
+                            <option th:selected="${searchResponse.status != null && searchResponse.status.name() == 'CLOSE'}"
+                                    value="CLOSE">Close
+                            </option>
+                        </select>
+                        <select name="interviewer" class="input-search  mb-3 mb-lg-0">
+                            <option selected disabled value="">-- interview --</option>
+                            <option th:each="is : ${interviews}"
+                                    th:selected="${searchResponse.interviewer == is.id}"
+                                    th:value="${is.id}"
+                                    th:utext="${is.fullName}"></option>
+                        </select>
+                    </form>
+                    <div  sec:authorize="hasAnyRole('ROLE_RECRUITER','ROLE_MANAGER')" class="add">
+                        <a th:href="@{/interview/create}">
+                            <ion-icon name="person-add-outline"
+                                      class="h3 mx-4"></ion-icon>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            <section class="px-5">
+                <div th:if="${message}" class="text-center">
+                    <span th:utext="${message}" class="text-danger"></span>
+                </div>
+                <div class="user-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>title</td>
+                            <td>Candidate name</td>
+                            <td>Interviewer</td>
+                            <td>Schedule</td>
+                            <td>Result</td>
+                            <td>Status</td>
+                            <td class="text-center">Action</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="is,i : ${interviewSchedules}">
+                            <td><span th:utext="${is.title}"></span></td>
+                            <td><span th:utext="${is.resultInterviews.candidate.fullName}"></span></td>
+                            <td>
+                                <span th:each="it,j : ${is.interviewer}"
+                                      th:if="${j.count == 1}"
+                                      th:utext="${it.interviewer.fullName}"></span>
+                                <span th:each="it,j : ${is.interviewer}"
+                                      th:if="${j.count > 1}"
+                                      th:utext="${' , ' + it.interviewer.fullName}"></span>
+                            </td>
+                            <td><span th:utext="${is.schedule.toString().replace('T', ' - ')}"></span></td>
+                            <td><span th:classappend="${is.resultInterviews.result.name() == 'FAIL' ? 'dangerStatus' :
+                            is.resultInterviews.result.name() == 'PASS' ? 'successStatus' :
+                            is.resultInterviews.result.name() == 'CANCEL' ? 'waringStatus' : 'primaryStatus'}"
+                                    th:utext="${is.resultInterviews.result.value}"></span></td>
+                            <td><span th:utext="${is.status.value}"></span></td>
+                            <td class="text-end" style="width: 160px">
+                                <a th:href="@{/interview/{id}(id=${is.id})}"
+                                   class="text-decoration-none h4">
+                                    <ion-icon name="eye-outline"></ion-icon>
+                                </a>
+                                <a th:href="@{/interview/edit/{id}(id=${is.id})}"
+                                   class="text-decoration-none h4 mx-3">
+                                    <ion-icon name="create-outline"></ion-icon>
+                                </a>
+                                <a href="#"
+                                   role="button"
+                                   th:onclick="'deleteById('+${is.id}+')'"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#deleteById"
+                                   class="text-decoration-none h4">
+                                    <ion-icon name="trash-outline"
+                                              id="interview"></ion-icon>
+                                </a>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <div class="d-flex justify-content-between align-items-center mx-5">
+                        <div class="my-3">
+                            <span class="h5 me-5 text-primary"
+                                  th:utext="${'Total: ' + interviewSchedules.totalElements + ' rows'}">
+                            </span>
+                            <span class="h5 text-danger"
+                                  th:if="${interviewSchedules.totalElements  == 0}"
+                            >
+                                Don't find interviewSchedule
+                            </span>
+                        </div>
+                        <nav th:if="${interviewSchedules.totalElements > 0}"
+                             aria-label="Page navigation example"
+                             class="mt-4">
+                            <ul class="pagination d-flex justify-content-center">
+                                <li></li>
+                                <li class="page-item me-1">
+                                    <a class="page-link"
+                                       th:with="pageNumber=${searchResponse.pageNumber > 1 ?
+                                   searchResponse.pageNumber - 1 : 1}"
+                                       th:href="@{/interview/(
+                                   pageNumber=${pageNumber},
+                                   param=${searchResponse.param},
+                                   interviewer=${searchResponse.interviewer},
+                                   status=${searchResponse.status}
+                                   )}"
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a></li>
+                                <li class="page-item me-1" th:each="p,i : ${searchResponse.pageMaxNumber}">
+                                    <a class="page-link"
+                                       th:href="@{/interview/(
+                                   pageNumber=${i.count},
+                                   param=${searchResponse.param},
+                                   interviewer=${searchResponse.interviewer},
+                                   status=${searchResponse.status}
+                                   )}"
+                                       th:classappend="${i.count == searchResponse.pageNumber ?
+                                    'bg-primary text-white' : ''}"
+                                       th:utext="${i.count}"></a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       th:with="pageNumber=${searchResponse.pageNumber < searchResponse.pageMaxNumber.size() ?
+                                   searchResponse.pageNumber + 1 : searchResponse.pageMaxNumber.size()}"
+                                       th:href="@{/interview/(
+                                   pageNumber=${pageNumber},
+                                   param=${searchResponse.param},
+                                   interviewer=${searchResponse.interviewer},
+                                   status=${searchResponse.status}
+                                   )}"
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

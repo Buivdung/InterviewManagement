@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/navigation}"
+>
+<head>
+    <th:block th:replace="~{layout/fragment::head}">
+    </th:block>
+    <link th:href="@{/css/common-add.css}" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div>
+        <nav aria-label="breadcrumb" class="my-4 ms-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/user}" class="text-decoration-none">List user</a>
+                </li>
+                <li class="breadcrumb-item" aria-current="page"> User detail</li>
+            </ol>
+        </nav>
+        <section class="p-5 user-container">
+            <div class="field-details">
+                <div class="user-form">
+                    <div class="user-form-left">
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="fullName"
+                                   th:value="${user.fullName}"
+                                   readonly/>
+                            <label class="form-lb" for="fullName"> Full name</label>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   type="text"
+                                   id="dob"
+                                   th:value="${user.dob}"
+                                   readonly/>
+                            <label class="form-lb" for="dob"> D.O.B</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   id="phoneNumber"
+                                   th:value="${user.phoneNumber}"
+                                   readonly/>
+                            <label class="form-lb" for="phoneNumber">Phone No.</label>
+                            <ion-icon class="form-icon" name="call-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input"
+                                   id="role"
+                                   th:value="${user.account.role}"
+                                   readonly/>
+                            <label class="form-lb form-lb-role" for="role"> Role</label>
+                            <ion-icon class="form-icon" name="finger-print-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   readonly id="v"
+                                   th:value="${user.account.status == true ? 'Active' : 'No Active'}"
+                                   required>
+                            <label class="form-lb form-lb-status" for="v"> Status</label>
+                            <ion-icon class="form-icon" name="swap-horizontal-outline"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="user-form-right">
+                        <div class="form-field">
+                            <input type="email"
+                                   class="form-input"
+                                   id="email"
+                                   th:value="${user.account.email}"
+                                   readonly required/>
+                            <label class="form-lb" for="email"> Email</label>
+                            <ion-icon class="form-icon" name="mail-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="address"
+                                   th:value="${user.address}"
+                                   readonly required/>
+                            <label class="form-lb" for="address"> Address</label>
+                            <ion-icon class="form-icon" name="home-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="gender"
+                                   th:value="${user.gender.name()}"
+                                   readonly required/>
+                            <label class="form-lb form-lb-gender" for="gender"> Gender</label>
+                            <ion-icon class="form-icon" name="transgender-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input" id="department"
+                                   th:value="${user.department.name}"
+                                   readonly required/>
+                            <label class="form-lb form-lb-department" for="department"> Department</label>
+                            <ion-icon class="form-icon" name="desktop-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="notes"
+                                   th:value="${user.notes}"
+                                   readonly/>
+                            <label class="form-lb" for="notes"> Notes</label>
+                            <ion-icon class="form-icon" name="chatbox-ellipses-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <a th:href="@{/user/edit/{id}(id=${user.id})}" role="button"
+                       class="btn btn-custom btn-outline-primary me-5">
+                        Edit
+                    </a>
+                    <a th:href="@{/user}" role="button"
+                       class="btn btn-custom btn-outline-secondary">
+                        Back
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script th:src="@{/js/common-add.js}"></script>
+</div>
+</body>
+</html>

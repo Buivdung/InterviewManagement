@@ -1,0 +1,80 @@
+  @Override
+    public void export(HttpServletResponse resp, List<T> t) {
+        setupExport(resp, t.get(0));
+        try (Workbook workbook = new XSSFWorkbook();
+             ServletOutputStream output = resp.getOutputStream()) {
+            Sheet sheet = workbook.createSheet(t.get(0).getClass().getSimpleName());
+            writeHeader(t, workbook, sheet);
+            writeData(t, workbook, sheet);
+            workbook.write(output);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    private void setupExport(HttpServletResponse resp, T t) {
+        resp.setContentType("application/octet-stream");
+        String keyHeader = "Content-Disposition";
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String dateFormat = simpleDateFormat.format(date);
+        String fileName = dateFormat + "_" + t.getClass().getSimpleName() + ".xlsx";
+        String valueHeader = "attachement; filename=" + fileName;
+        resp.setHeader(keyHeader, valueHeader);
+    }
+
+    private void writeHeader(List<T> t, Workbook workbook, Sheet sheet) {
+        Row row = sheet.createRow(0);
+        Gson gson = new Gson();
+        String a = gson.toJson(t.get(0));
+        JsonObject json = (JsonObject) JsonParser.parseString(a);
+        Set<String> keys = json.keySet();
+        int i = 0;
+        for (String key : keys) {
+            Cell cell = row.createCell(i);
+            cell.setCellValue(key);
+            cell.setCellStyle(styleHeader(workbook));
+            i++;
+        }
+    }
+
+    private CellStyle styleHeader(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        XSSFFont font = (XSSFFont) workbook.createFont();
+        font.setFontHeight(16);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setFont(font);
+        return cellStyle;
+    }
+
+    private void writeData(List<T> t, Workbook workbook, Sheet sheet) {
+        int rowNumber = 1;
+        for (T e : t) {
+            Row row = sheet.createRow(rowNumber);
+            Gson gson = new Gson();
+            String json = gson.toJson(e);
+            JsonObject jsonObject = (JsonObject) JsonParser.parseString(json);
+            int cellNumber = 0;
+            for (Entry<String, JsonElement> jsonElement : jsonObject.entrySet()) {
+                Cell cell = row.createCell(cellNumber);
+                cell.setCellValue(jsonElement.getValue().getAsString());
+                sheet.autoSizeColumn(cellNumber);
+                cell.setCellStyle(styleData(workbook));
+                cellNumber++;
+            }
+            rowNumber++;
+        }
+    }
+
+    private CellStyle styleData(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        return cellStyle;
+    }

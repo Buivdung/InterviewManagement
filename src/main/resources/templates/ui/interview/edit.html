@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/navigation}"
+>
+<head>
+    <th:block th:replace="~{layout/fragment::head}">
+    </th:block>
+    <link th:href="@{/css/common-add.css}" rel="stylesheet">
+    <link th:href="@{/css/choices.css}" rel="stylesheet">
+    <script th:src="@{/js/choices.js}"></script>
+    <script th:src="@{/js/interview.js}"></script>
+    <link th:href="@{/css/candidate.css}" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div>
+        <nav aria-label="breadcrumb" class="my-4 ms-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item" aria-current="page">Edit interview schedule</li>
+            </ol>
+        </nav>
+        <section class="p-5 user-container">
+            <div th:if="${message}" class="text-center">
+                <span th:utext="${message}" class="text-danger"></span>
+            </div>
+            <form th:action="@{/interview/edit/{id}(id=${interviewSchedule.id})}" method="post">
+                <div class="user-form">
+                    <div class="user-form-left">
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="title"
+                                   th:value="${interviewSchedule.title}"
+                                   name="title"
+                                   required/>
+                            <label class="form-lb" for="title">Interview title</label>
+                            <ion-icon class="form-icon" name="newspaper-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input "
+                                   id="candidateId"
+                                   th:value="${interviewSchedule.resultInterviews.candidate.fullName}"
+                                   readonly
+                                   required/>
+                            <label class="form-lb" for="candidateId"> Candidate name</label>
+                            <input type="hidden"
+                                    name="candidateId" th:value="${interviewSchedule.resultInterviews.candidate.id}"/>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input class="form-input datetime"
+                                   id="schedule"
+                                   th:value="${interviewSchedule.schedule}"
+                                   name="schedule" required/>
+                            <label class="form-lb" for="schedule"> Schedule</label>
+                            <ion-icon class="form-icon" name="calendar-number-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <textarea class="textarea-input"
+                                      name="note"
+                                      th:utext="${interviewSchedule.resultInterviews.note}"
+                                      id="note"></textarea>
+                            <label class="form-lb" for="note"> Notes</label>
+                            <ion-icon class="form-icon" name="chatbox-ellipses-outline"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="user-form-right">
+                        <div class="form-field">
+                            <select class="form-input" id="interviewId" name="interviewId" multiple>
+                                <option th:each="u : ${users}"
+                                        th:if="${u.account.role.name() == 'ROLE_INTERVIEW'}"
+                                        th:utext="${u.fullName}"
+                                        th:selected="${interviewerIds.containsAll(u.id)}"
+                                        th:value="${u.id}"></option>
+                            </select>
+                            <label class="form-lb form-lb-gender" for="interviewId"> Assignee</label>
+                            <ion-icon class="form-icon" name="people-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="recruiterId" name="recruiterId" required>
+                                <option disabled selected> Select recruiter</option>
+                                <option th:each="u :${users}"
+                                        th:if="${u.account.role.name() == 'ROLE_RECRUITER'}"
+                                        th:selected="${interviewSchedule.recruiter.id == u.id}"
+                                        th:utext="${u.fullName}"
+                                        th:value="${u.id}"></option>
+                            </select>
+                            <label class="form-lb" for="recruiterId">Recruiter owner</label>
+                            <ion-icon class="form-icon" name="person-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="location" name="location" required>
+                                <option th:selected="${interviewSchedule.location == true}"
+                                        th:value="${true}">Offline</option>
+                                <option th:selected="${interviewSchedule.location == false}"
+                                        th:value="${false}">Online</option>
+                            </select>
+                            <label class="form-lb form-lb-department" for="location"> Location</label>
+                            <ion-icon class="form-icon" name="swap-horizontal-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <input type="text"
+                                   class="form-input"
+                                   id="meeting"
+                                   name="meeting"
+                                   th:value="${interviewSchedule.meeting}"
+                                   required/>
+                            <label class="form-lb" for="meeting"> Meeting</label>
+                            <ion-icon class="form-icon" name="pencil-outline"></ion-icon>
+                        </div>
+                        <div class="form-field">
+                            <select class="form-input form-select-role" id="status" name="status" required>
+                                <option th:selected="${interviewSchedule.status.name() =='OPEN'}"
+                                value="OPEN">Open</option>
+                                <option th:selected="${interviewSchedule.status.name() =='CLOSE'}"
+                                VALUE="CLOSE">Close</option>
+                                <option th:selected="${interviewSchedule.status.name() =='IN_PROGRESS'}"
+                                VALUE="IN_PROGRESS">In progress</option>
+                            </select>
+                            <label class="form-lb" for="status"> Status</label>
+                            <ion-icon class="form-icon" name="pencil-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="submit" value="Save" class="btn btn-custom btn-outline-primary me-5">
+                    <a th:href="@{/interview}" role="button"
+                       class="btn btn-custom btn-outline-secondary">
+                        Back
+                    </a>
+                </div>
+            </form>
+        </section>
+    </div>
+    <script th:src="@{/js/common-add.js}"></script>
+</div>
+</body>
+</html>
