@@ -52,15 +52,23 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public InterviewSchedule saveInterviewSchedule(InterviewRequest interviewRequest) throws MessagingException {
-        InterviewSchedule interviewSchedule = interviewRepository.save(getInterviewSchedule(new InterviewSchedule(), interviewRequest));
-        emailService.sendMailInterviewScheduleToInterviewer(interviewSchedule.getInterviewer());
-        emailService.sendMailInterviewScheduleToCandidate(interviewSchedule.getResultInterviews());
+        InterviewSchedule interviewSchedule = interviewRepository
+                .save(getInterviewSchedule(new InterviewSchedule(), interviewRequest));
+        List<String> emails = new ArrayList<>();
+        emails.add(interviewSchedule.getResultInterviews().getCandidate().getEmail());
+        interviewSchedule.getInterviewer().forEach(
+                x -> emails.add(x.getInterviewer().getAccount().getEmail())
+        );
+        emailService.sendMailNotificationInterviewSchedule(emails,
+                MessageList.Common.NOTIFICATION_INTERVIEW_SCHEDULE,
+                interviewSchedule);
         return interviewSchedule;
     }
 
     @Override
     @Transactional
-    public InterviewSchedule updateInterviewSchedule(InterviewSchedule interviewSchedule, InterviewRequest interviewRequest)
+    public InterviewSchedule updateInterviewSchedule(InterviewSchedule interviewSchedule,
+                                                     InterviewRequest interviewRequest)
             throws MessagingException {
         CheckUpdate checkUpdate = checkUpdate(interviewSchedule, interviewRequest);
         interviewSchedule = interviewRepository.save(interviewSchedule);
@@ -77,9 +85,10 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     @Transactional
-    public void deleteInterviewScheduleById(Long id) {
+    public void deleteInterviewScheduleById(Long id) throws MessagingException {
         InterviewSchedule interviewSchedule = findByInterviewScheduleById(id);
         Candidate candidate = interviewSchedule.getResultInterviews().getCandidate();
+        sendMailCancel(interviewSchedule);
         interviewerScheduleRepository.deleteBySchedule_Id(id);
         resultInterviewRepository.deleteByInterviewSchedule_Id(id);
         interviewRepository.deleteByInterviewScheduleID(id);
@@ -95,7 +104,8 @@ public class InterviewServiceImpl implements InterviewService {
                 .orElseThrow(() -> new IllegalArgumentException(MessageList.MessageInterview.DONT_FOUND_INTERVIEW));
     }
 
-    private InterviewSchedule getInterviewSchedule(InterviewSchedule interviewSchedule, InterviewRequest interviewRequest) {
+    private InterviewSchedule getInterviewSchedule(InterviewSchedule interviewSchedule,
+                                                   InterviewRequest interviewRequest) {
         modelMapper.map(interviewRequest, interviewSchedule);
         Candidate candidate = candidateRepository.findById(interviewRequest.getCandidateId()).orElseThrow();
         if (candidate.getStatus().equals(EStatus.OPEN)) {
@@ -112,7 +122,8 @@ public class InterviewServiceImpl implements InterviewService {
         return interviewSchedule;
     }
 
-    private List<InterviewerSchedule> getInterviewerSchedules(List<Users> interviewers, InterviewSchedule interviewSchedule) {
+    private List<InterviewerSchedule> getInterviewerSchedules(List<Users> interviewers,
+                                                              InterviewSchedule interviewSchedule) {
         return interviewers.stream().map(i ->
                 InterviewerSchedule.builder()
                         .interviewer(i)
@@ -121,7 +132,9 @@ public class InterviewServiceImpl implements InterviewService {
         ).toList();
     }
 
-    private ResultInterview getResultInterview(Candidate candidate, InterviewSchedule interviewSchedule, String notes) {
+    private ResultInterview getResultInterview(Candidate candidate,
+                                               InterviewSchedule interviewSchedule,
+                                               String notes) {
         return ResultInterview.builder()
                 .candidate(candidate)
                 .note(notes)
@@ -130,7 +143,8 @@ public class InterviewServiceImpl implements InterviewService {
                 .build();
     }
 
-    private CheckUpdate checkUpdate(InterviewSchedule interviewSchedule, InterviewRequest interviewRequest) {
+    private CheckUpdate checkUpdate(InterviewSchedule interviewSchedule,
+                                    InterviewRequest interviewRequest) {
         CheckUpdate checkUpdate = new CheckUpdate();
         interviewSchedule.setStatus(interviewRequest.getStatus());
         interviewSchedule.setTitle(interviewRequest.getTitle());
@@ -170,7 +184,8 @@ public class InterviewServiceImpl implements InterviewService {
             setInterviewUpdate(ids, interviewRequest.getInterviewId(), checkUpdate);
             List<Users> interviewers = userRepository.findAllById(interviewRequest.getInterviewId());
             if (!checkUpdate.getInterviewsRemove().isEmpty()) {
-                List<InterviewerSchedule> interviewerSchedules = interviewerScheduleRepository.findInterviewerScheduleByInterviewer_IdIn(checkUpdate.interviewsRemove);
+                List<InterviewerSchedule> interviewerSchedules = interviewerScheduleRepository
+                        .findInterviewerScheduleByInterviewer_IdIn(checkUpdate.interviewsRemove);
                 interviewerScheduleRepository.deleteAll(interviewerSchedules);
             }
             List<InterviewerSchedule> interviewerSchedule = new ArrayList<>();
@@ -186,7 +201,9 @@ public class InterviewServiceImpl implements InterviewService {
         }
     }
 
-    private void setInterviewUpdate(List<Long> interviewIdsOld, List<Long> interviewIdsNew, CheckUpdate checkUpdate) {
+    private void setInterviewUpdate(List<Long> interviewIdsOld,
+                                    List<Long> interviewIdsNew,
+                                    CheckUpdate checkUpdate) {
         Set<Long> old = new HashSet<>();
         for (Long i : interviewIdsOld) {
             for (Long l : interviewIdsNew) {
@@ -203,24 +220,51 @@ public class InterviewServiceImpl implements InterviewService {
         checkUpdate.setInterviewAdd(interviewIdsNew);
     }
 
-    private void sendMailUpdate(CheckUpdate checkUpdate, EStatus eStatus, InterviewSchedule interviewSchedule)
+    private void sendMailUpdate(CheckUpdate checkUpdate,
+                                EStatus eStatus,
+                                InterviewSchedule interviewSchedule)
             throws MessagingException {
         if (checkUpdate.isCheckInterview) {
             if (!checkUpdate.interviewAdd.isEmpty()) {
                 List<Users> interviewerNew = userRepository.findAllById(checkUpdate.interviewAdd);
-                emailService.sendMailUpdateInterviewScheduleToInterviewer(interviewerNew, interviewSchedule);
+                List<String> emails = new ArrayList<>(
+                        interviewerNew.stream().map(x -> x.getAccount().getEmail()).toList()
+                );
+                emailService.sendMailNotificationInterviewSchedule(emails,
+                        MessageList.Common.NOTIFICATION_INTERVIEW_SCHEDULE,
+                        interviewSchedule);
             }
             if (!checkUpdate.interviewsRemove.isEmpty()) {
                 List<Users> interviewerOld = userRepository.findAllById(checkUpdate.interviewsRemove);
-                emailService.sendMailUpdateInterviewScheduleToInterviewer(interviewerOld, interviewSchedule);
+                List<String> emails = new ArrayList<>(
+                        interviewerOld.stream().map(x -> x.getAccount().getEmail()).toList()
+                );
+                emailService.sendMailNotificationInterviewSchedule(emails,
+                        MessageList.Common.NOTIFICATION_CANCEL_INTERVIEW,
+                        interviewSchedule);
             }
         }
         if (checkUpdate.isCheckLocation && eStatus.equals(EStatus.WAITING_FOR_INTERVIEW)) {
-            if (!checkUpdate.isCheckInterview) {
-                emailService.sendMailUpdateInterviewScheduleToInterviewer(interviewSchedule.getInterviewer());
-            }
-            emailService.sendMailUpdateInterviewScheduleToCandidate(interviewSchedule.getResultInterviews());
+            List<String> emails = new ArrayList<>();
+            emails.add(interviewSchedule.getResultInterviews().getCandidate().getEmail());
+            interviewSchedule.getInterviewer().forEach(
+                    x -> emails.add(x.getInterviewer().getAccount().getEmail())
+            );
+            emailService.sendMailNotificationInterviewSchedule(emails,
+                    MessageList.Common.NOTIFICATION_CHANGE_INTERVIEW,
+                    interviewSchedule);
         }
+    }
+
+    private void sendMailCancel(InterviewSchedule interviewSchedule) throws MessagingException {
+        List<String> emails = new ArrayList<>();
+        emails.add(interviewSchedule.getResultInterviews().getCandidate().getEmail());
+        interviewSchedule.getInterviewer().forEach(
+                x -> emails.add(x.getInterviewer().getAccount().getEmail())
+        );
+        emailService.sendMailNotificationInterviewSchedule(emails,
+                MessageList.Common.NOTIFICATION_CANCEL_INTERVIEW,
+                interviewSchedule);
     }
 
     @Data

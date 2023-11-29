@@ -15,7 +15,6 @@ public interface MessageList {
         String SEARCH_RESPONSE = "searchResponse";
 
         String DEPARTMENTS = "departments";
-        String DEPARTMENT = "department";
         String OFFER = "offer";
         String OFFERS = "offers";
 
@@ -23,11 +22,8 @@ public interface MessageList {
         String CANDIDATES = "candidates";
         String INTERVIEW_SCHEDULE = "interviewSchedule";
         String INTERVIEW_SCHEDULES = "interviewSchedules";
-        String INTERVIEW = "interview";
         String INTERVIEWS = "interviews";
         String RECRUITERS = "recruiters";
-        String RECRUITER = "recruiter";
-        String SKILL = "skill";
         String SKILLS = "skills";
         String BENEFITS = "benefits";
         String JOB = "job";
@@ -39,6 +35,9 @@ public interface MessageList {
         String INTERVIEWERS_ID = "interviewerIds";
 
         String BENEFITIDS = "benefitIds";
+        String NOTIFICATION_INTERVIEW_SCHEDULE = "Interview schedule";
+        String NOTIFICATION_CANCEL_INTERVIEW = "Cancel interview schedule";
+        String NOTIFICATION_CHANGE_INTERVIEW = "Change interview schedule";
     }
 
 
