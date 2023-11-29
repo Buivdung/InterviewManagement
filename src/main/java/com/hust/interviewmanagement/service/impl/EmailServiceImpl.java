@@ -48,138 +48,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async("taskExecutor")
-    public void sendMailInterviewScheduleToCandidate(ResultInterview resultInterview) throws MessagingException {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div>")
-                .append("<h5>Interview schedule</h5>")
-                .append("<h6>Time: </h6> <span>").append(resultInterview.getInterviewSchedule().getSchedule()).append("</span>")
-                .append("</br>")
-                .append("<h6>Location: </h6> <span>").append(resultInterview.getInterviewSchedule().isLocation() ? "Online" : "Offline").append("</span>")
-                .append("</br>")
-                .append("<h6>Meeting: </h6> <span>").append(resultInterview.getInterviewSchedule().getMeeting()).append("</span>")
-                .append("</br>")
-                .append("</div>");
-        EmailDetail emailDetail = EmailDetail.builder()
-                .recipient("dungbv201098@gmail.com")
-                .subject("Interview schedule")
-                .msgBody(sb.toString())
-                .build();
-        sendMailHtml(emailDetail);
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailCancelInterviewScheduleToCandidate(ResultInterview resultInterview) throws MessagingException {
-        String body = "Cancel interview schedule...";
-        System.out.println(resultInterview);
-        EmailDetail emailDetail = EmailDetail.builder()
-                .recipient("dungbv201098@gmail.com")
-                .subject("Interview schedule")
-                .msgBody(body)
-                .build();
-        sendMailHtml(emailDetail);
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailUpdateInterviewScheduleToCandidate(ResultInterview resultInterview) throws MessagingException {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div>")
-                .append("<h5>Change Interview schedule</h5>")
-                .append("<h6>Time: </h6> <span>").append(resultInterview.getInterviewSchedule().getSchedule()).append("</span>")
-                .append("</br>")
-                .append("<h6>Location: </h6> <span>").append(resultInterview.getInterviewSchedule().isLocation() ? "Online" : "Offline").append("</span>")
-                .append("</br>")
-                .append("<h6>Meeting: </h6> <span>").append(resultInterview.getInterviewSchedule().getMeeting()).append("</span>")
-                .append("</br>")
-                .append("</div>");
-        EmailDetail emailDetail = EmailDetail.builder()
-                .recipient("dungbv201098@gmail.com")
-                .subject("Change Interview schedule")
-                .msgBody(sb.toString())
-                .build();
-        sendMailHtml(emailDetail);
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailResultToCandidate(ResultInterview resultInterview) throws MessagingException {
-        String body = "Your result is " + resultInterview.getResult();
-        EmailDetail emailDetail = EmailDetail.builder()
-                .recipient("dungbv201098@gmail.com")
-                .subject("Result Interview schedule")
-                .msgBody(body)
-                .build();
-        sendMailHtml(emailDetail);
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailInterviewScheduleToInterviewer(Collection<InterviewerSchedule> interviewerSchedules) throws MessagingException {
-        for (InterviewerSchedule i : interviewerSchedules) {
+    public void sendMailNotificationInterviewSchedule(Collection<String> email, String subject, InterviewSchedule interviewSchedule) throws MessagingException {
+        for (String e : email) {
             StringBuilder sb = new StringBuilder();
             sb.append("<div>")
-                    .append("<h5>Interview schedule</h5>")
-                    .append("<h6>Time: </h6> <span>").append(i.getSchedule().getSchedule()).append("</span>")
-                    .append("</br>")
-                    .append("<h6>Location: </h6> <span>").append(i.getSchedule().isLocation() ? "Online" : "Offline").append("</span>")
-                    .append("</br>")
-                    .append("<h6>Meeting: </h6> <span>").append(i.getSchedule().getMeeting()).append("</span>")
-                    .append("</br>")
-                    .append("</div>");
-            EmailDetail emailDetail = EmailDetail.builder()
-                    .recipient("dungbv201098@gmail.com")
-                    .subject("Interview schedule")
-                    .msgBody(sb.toString())
-                    .build();
-            sendMailHtml(emailDetail);
-        }
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailCancelInterviewScheduleToInterviewer(Collection<InterviewerSchedule> interviewerSchedules) throws MessagingException {
-        String body = "Cancel interview schedule...";
-        for (InterviewerSchedule i : interviewerSchedules) {
-            EmailDetail emailDetail = EmailDetail.builder()
-                    .recipient("dungbv201098@gmail.com")
-                    .subject("Interview schedule")
-                    .msgBody(body)
-                    .build();
-            sendMailHtml(emailDetail);
-        }
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailUpdateInterviewScheduleToInterviewer(Collection<InterviewerSchedule> interviewerSchedules) throws MessagingException {
-        for (InterviewerSchedule i : interviewerSchedules) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("<div>")
-                    .append("<h5>Change Interview schedule</h5>")
-                    .append("<h6>Time: </h6> <span>").append(i.getSchedule().getSchedule()).append("</span>")
-                    .append("</br>")
-                    .append("<h6>Location: </h6> <span>").append(i.getSchedule().isLocation() ? "Online" : "Offline").append("</span>")
-                    .append("</br>")
-                    .append("<h6>Meeting: </h6> <span>").append(i.getSchedule().getMeeting()).append("</span>")
-                    .append("</br>")
-                    .append("</div>");
-            EmailDetail emailDetail = EmailDetail.builder()
-                    .recipient("dungbv201098@gmail.com")
-                    .subject("Change Interview schedule")
-                    .msgBody(sb.toString())
-                    .build();
-            sendMailHtml(emailDetail);
-        }
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public void sendMailUpdateInterviewScheduleToInterviewer(Collection<Users> users, InterviewSchedule interviewSchedule) throws MessagingException {
-        for (Users u : users) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("<div>")
-                    .append("<h5>Change Interview schedule</h5>")
+                    .append("<h5>").append(subject).append("</h5>")
                     .append("<h6>Time: </h6> <span>").append(interviewSchedule.getSchedule()).append("</span>")
                     .append("</br>")
                     .append("<h6>Location: </h6> <span>").append(interviewSchedule.isLocation() ? "Online" : "Offline").append("</span>")
@@ -188,13 +61,26 @@ public class EmailServiceImpl implements EmailService {
                     .append("</br>")
                     .append("</div>");
             EmailDetail emailDetail = EmailDetail.builder()
-                    .recipient("dungbv201098@gmail.com")
-                    .subject("Change Interview schedule")
+                    .recipient(e)
+                    .subject(subject)
                     .msgBody(sb.toString())
                     .build();
             sendMailHtml(emailDetail);
         }
     }
+
+    @Override
+    public void sendMailCancelInterviewSchedule(Collection<String> email) throws MessagingException {
+        for (String e : email) {
+            EmailDetail emailDetail = EmailDetail.builder()
+                    .recipient(e)
+                    .subject("Cancel Interview schedule")
+                    .msgBody("Sorry!")
+                    .build();
+            sendMailHtml(emailDetail);
+        }
+    }
+
 
     @Override
     @Async("taskExecutor")
@@ -216,7 +102,6 @@ public class EmailServiceImpl implements EmailService {
                 .build();
         sendMailHtml(emailDetail);
     }
-
 
 
 }
