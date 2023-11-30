@@ -41,6 +41,7 @@ public class AutoUpdate {
         List<InterviewSchedule> interviewSchedules = interviewScheduleRepository.findAllBySchedule(localDate);
         Set<InterviewerSchedule> interviewers = new HashSet<>();
         interviewSchedules.forEach(x -> interviewers.addAll(x.getInterviewer()));
-        emailService.sendMailInterviewScheduleToInterviewer(interviewers);
+        List<String> emails = interviewers.stream().map(x -> x.getInterviewer().getAccount().getEmail()).toList();
+        emailService.sendMailNotificationInterviewSchedule(emails, "Nhac nho phong van", interviewSchedules.get(0));
     }
 }
